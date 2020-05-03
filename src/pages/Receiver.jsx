@@ -30,6 +30,8 @@ const Receiver = () => {
   const [stream, setStream] = useState(null);
   const [caller, setCaller] = useState(null);
   const [callState, setCallState] = useState(null);
+  const [{btnText, btnColor}, setBtnText] = useState({btnText: "Accept", btnColor: "success"});
+  const [{myVideoPlayerSize, peerVideoPlayerSize}, setMyVideoPlayerSize] = useState({myVideoPlayerSize: "full-width", peerVideoPlayerSize: "full-width"})
 
   const history = useHistory();
   const player = useRef(null);
@@ -120,57 +122,82 @@ const Receiver = () => {
         },
         to: caller,
       });
+      
     });
 
     peer.on("stream", (stream) => {
       peerPlayer.current.srcObject = stream;
+      setMyVideoPlayerSize(currentState => ({
+        ...currentState,
+        myVideoPlayerSize: "small-top-left"
+      }));
     });
 
     peer.signal(signal);
+    setBtnText(currentState => ({
+      ...currentState,
+      btnText: "Decline",
+      btnColor: "danger"
+    }));
   };
 
   return (
     <>
       <NavBar />
       <Container className="my-5">
-        <Card body className="mb-3">
-          <Media>
-            <Image
-              roundedCircle
-              src={`https://api.adorable.io/avatars/285/${user.name}.png`}
-              className="mr-3 bg-light emboss"
-              width={70}
-              height={70}
-            />
-            <Media.Body>
-              <h6 className="mb-0">{user.name}</h6>
-              <Badge variant="success">{user.type}</Badge>
-            </Media.Body>
-          </Media>
-        </Card>
-
-        <Row className="my-5" noGutters>
-          <Col sm={12} md={6} lg={6}>
-            <video ref={player} autoPlay controls muted className="img-fluid" />
+        <Row>
+          <Col lg={4}>
+            <Card body className="mb-3">
+              <Media>
+                <Image
+                  roundedCircle
+                  src={`https://api.adorable.io/avatars/285/${user.name}.png`}
+                  className="mr-3 bg-light emboss"
+                  width={70}
+                  height={70}
+                />
+                <Media.Body>
+                  <h6 className="mb-0">{user.name}</h6>
+                  <Badge variant="success">{user.type}</Badge>
+                </Media.Body>
+              </Media>
+            </Card>
+            {users.map(({ id, name, type, socketID: sID }) => {
+              if (id === userID && sID === socketID) return null;
+              return (
+                <UserCard
+                  key={id}
+                  name={name}
+                  type={type}
+                  showButton={caller && caller.id === id}
+                  color={btnColor}
+                  buttonText={btnText}
+                  onClick={() => onAccept({ id, name, type, socketID: sID })}
+                />
+              );
+            })}
           </Col>
-          <Col sm={12} md={6} lg={6}>
-            <video ref={peerPlayer} autoPlay controls className="img-fluid" />
+          <Col lg={8}>
+            <Row lg={12}>
+              <video 
+                ref={player} 
+                autoPlay
+                controls={false}
+                playsInline
+                muted={true}
+                className={`flip-video img-fluid ${myVideoPlayerSize}`}
+              />
+              <video 
+                ref={peerPlayer} 
+                autoPlay
+                muted={false}
+                playsInline
+                controls={false}
+                className={`flip-video img-fluid full-width ${peerVideoPlayerSize}`}
+              />
+            </Row>
           </Col>
         </Row>
-
-        {users.map(({ id, name, type, socketID: sID }) => {
-          if (id === userID && sID === socketID) return null;
-          return (
-            <UserCard
-              key={id}
-              name={name}
-              type={type}
-              showButton={caller && caller.id === id}
-              buttonText="Accept"
-              onClick={() => onAccept({ id, name, type, socketID: sID })}
-            />
-          );
-        })}
       </Container>
     </>
   );

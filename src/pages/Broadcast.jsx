@@ -27,12 +27,15 @@ const Broadcast = () => {
   const [userID, setUserID] = useState(null);
   const [socketID, setSocketID] = useState(null);
   const [callState, setCallState] = useState(null);
+  const [{btnText, btnColor}, setBtnText] = useState({btnText: "Call", btnColor: "success"});
+  const [{myVideoPlayerSize, peerVideoPlayerSize}, setMyVideoPlayerSize] = useState({myVideoPlayerSize: "full-width", peerVideoPlayerSize: "full-width"})
 
   const history = useHistory();
   const player = useRef(null);
   const peerPlayer = useRef(null);
   let socket = useRef(null);
 
+  // let reff = React
   useEffect(() => {
     console.log(`Logged in as ${user.name}, ${!user.name.length}`);
     if (!user.name.length) {
@@ -115,66 +118,87 @@ const Broadcast = () => {
 
     peer.on("stream", (stream) => {
       peerPlayer.current.srcObject = stream;
+      setMyVideoPlayerSize(currentState => ({
+        ...currentState,
+        myVideoPlayerSize: "small-top-left"
+      }));
+      setBtnText(currentState => ({
+        ...currentState,
+        btnText: "Decline",
+        btnColor: "danger"
+      }));
     });
 
     socket.current.on("call-acknowledged", (res) => {
       console.log("Call Acknowledged from: ", res.from.name, res.from.socketID);
       peer.signal(res.signal);
     });
+
+    setBtnText(currentState => ({
+      ...currentState,
+      btnText: "Calling..."
+    }));
   };
 
   return (
     <>
       <NavBar />
       <Container className="my-5">
-        <Card body className="mb-3">
-          <Media>
-            <Image
-              roundedCircle
-              src={`https://api.adorable.io/avatars/285/${user.name}.png`}
-              className="mr-3 bg-light emboss"
-              width={70}
-              height={70}
-            />
-            <Media.Body className="align-self-center">
-              <h6 className="mb-0">{user.name}</h6>
-              <Badge variant="primary">{user.type}</Badge>
-            </Media.Body>
-          </Media>
-        </Card>
-
-        <Row className="my-5" noGutters>
-          <Col sm={12} md={6} lg={6}>
-            <video
-              ref={player}
-              autoPlay
-              controls
-              muted
-              className="img-fluid w-100"
-            />
+        <Row> 
+          <Col lg={4}>
+            <Card body className="mb-3">
+              <Media>
+                <Image
+                  roundedCircle
+                  src={`https://api.adorable.io/avatars/285/${user.name}.png`}
+                  className="mr-3 bg-light emboss"
+                  width={70}
+                  height={70}
+                />
+                <Media.Body className="align-self-center">
+                  <h6 className="mb-0">{user.name}</h6>
+                  <Badge variant="primary">{user.type}</Badge>
+                </Media.Body>
+              </Media>
+            </Card>
+            {users.map(({ id, name, type, socketID: sID }) => {
+              if (id === userID && sID === socketID) return null;
+              return (
+                <UserCard
+                  key={id}
+                  name={name}
+                  type={type}
+                  color={btnColor}
+                  buttonText={btnText}
+                  onClick={() => onCall({ id, name, type, socketID: sID })}
+                />
+              );
+            })}
           </Col>
-          <Col sm={12} md={6} lg={6}>
-            <video
-              ref={peerPlayer}
-              autoPlay
-              controls
-              className="img-fluid w-100"
-            />
+
+          <Col lg={8}>
+            <Row lg={12}>
+              <video
+                ref={player}
+                autoPlay
+                controls={false}
+                playsInline
+                muted={true}
+                className={`flip-video img-fluid ${myVideoPlayerSize}`}
+              />
+              <video
+                ref={peerPlayer}
+                autoPlay
+                muted={false}
+                playsInline
+                controls={false}
+                className={`flip-video img-fluid full-width ${peerVideoPlayerSize}`}
+              />
+            </Row>
           </Col>
         </Row>
 
-        {users.map(({ id, name, type, socketID: sID }) => {
-          if (id === userID && sID === socketID) return null;
-          return (
-            <UserCard
-              key={id}
-              name={name}
-              type={type}
-              buttonText="Call"
-              onClick={() => onCall({ id, name, type, socketID: sID })}
-            />
-          );
-        })}
+        
       </Container>
     </>
   );

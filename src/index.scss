@@ -34,3 +34,24 @@ h6 {
   background: #eeeeee;
   box-shadow: 5px 5px 10px #cacaca, -5px -5px 10px #ffffff;
 }
+
+.full-width {
+  width: 100%;
+  position: relative;
+  z-index: 1;
+  top: auto;
+  left: auto;
+}
+
+.small-top-left {
+  width: 25%;
+  position: absolute;
+  z-index: 9;
+  top: 1rem;
+  left: 1rem;
+  transition: all 0.5s ease-in-out;
+}
+
+.flip-video {
+  transform: rotateY(180deg);
+}

@@ -3,7 +3,7 @@ import { Card, Media, Image, Button, Badge } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPhoneAlt } from "@fortawesome/free-solid-svg-icons";
 
-const UserCard = ({ name, type, onClick, buttonText, showButton }) => {
+const UserCard = ({ name, type, onClick, color, buttonText, showButton }) => {
   return (
     <Card body className="mb-3">
       <Media className="align-items-center">
@@ -20,7 +20,7 @@ const UserCard = ({ name, type, onClick, buttonText, showButton }) => {
         </Media.Body>
 
         {showButton && (
-          <Button variant="success" onClick={onClick}>
+          <Button variant={color} onClick={onClick}>
             <FontAwesomeIcon icon={faPhoneAlt} className="mr-2" />
             {buttonText}
           </Button>

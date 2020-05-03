@@ -1,4 +1,5 @@
 import React, { useState, useContext } from "react";
+import validator from "validator";
 import {
   Container,
   Form,
@@ -12,7 +13,6 @@ import {
 import UserContext from "../contexts/UserContext";
 import { useHistory } from "react-router";
 import NavBar from "../components/Navbar";
-import validator from "validator";
 
 const Login = () => {
   const { setUserName, setUserType } = useContext(UserContext);
